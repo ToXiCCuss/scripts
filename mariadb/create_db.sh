@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Prüfen, ob ein Datenbankname übergeben wurde
+if [ -z "$1" ]; then
+  echo "Usage: $0 <database_name>"
+  exit 1
+fi
+
+DB_NAME=$1
+DB_USER="${DB_NAME}_owner"
+
+# Rollennamen basierend auf dem Datenbanknamen definieren
+ROLE_RO="${DB_NAME}_role_ro"
+ROLE_RW="${DB_NAME}_role_rw"
+ROLE_OWNER="${DB_NAME}_role_owner"
+
+# Generiert ein zufälliges 30-stelliges Passwort
+DB_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 30)
+
+echo "Creating Database: $DB_NAME"
+echo "Creating User:     $DB_USER"
+echo "Roles:             $ROLE_RO, $ROLE_RW, $ROLE_OWNER"
+echo "Password:          $DB_PASS"
+echo "------------------------------------------"
+
+# MariaDB Befehle ausführen
+mariadb -u root <<EOF
+  -- 1. Datenbank erstellen
+  CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`;
+
+  -- 2. Rollen erstellen
+  CREATE ROLE IF NOT EXISTS "$ROLE_RO";
+  CREATE ROLE IF NOT EXISTS "$ROLE_RW";
+  CREATE ROLE IF NOT EXISTS "$ROLE_OWNER";
+
+  -- 3. Berechtigungen an Rollen vergeben
+  GRANT SELECT ON \`$DB_NAME\`.* TO "$ROLE_RO";
+  GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DB_NAME\`.* TO "$ROLE_RW";
+  GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO "$ROLE_OWNER";
+
+  -- 4. User anlegen und der spezifischen Owner-Rolle zuweisen
+  CREATE USER IF NOT EXISTS "$DB_USER"@'%' IDENTIFIED BY '$DB_PASS';
+  GRANT "$ROLE_OWNER" TO "$DB_USER"@'%';
+  
+  -- In MariaDB muss die Rolle als Default gesetzt werden
+  SET DEFAULT ROLE "$ROLE_OWNER" FOR "$DB_USER"@'%';
+
+  FLUSH PRIVILEGES;
+EOF
+
+if [ $? -eq 0 ]; then
+  echo "Setup for $DB_NAME completed successfully."
+else
+  echo "Error during setup."
+fi
