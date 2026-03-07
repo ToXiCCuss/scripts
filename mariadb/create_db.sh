@@ -35,7 +35,6 @@ mariadb -u root <<EOF
   CREATE USER IF NOT EXISTS "$DB_USER"@'%' IDENTIFIED BY '$DB_PASS';
   GRANT "$ROLE_OWNER" TO "$DB_USER"@'%';
   
-  -- In MariaDB muss die Rolle als Default gesetzt werden
   SET DEFAULT ROLE "$ROLE_OWNER" FOR "$DB_USER"@'%';
 
   FLUSH PRIVILEGES;
