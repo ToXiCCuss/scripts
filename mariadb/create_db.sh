@@ -42,9 +42,9 @@ mariadb -u root <<EOF
 EOF
 
 if [ $? -eq 0 ]; then
-  echo "Setup for $DB_NAME completed successfully."
+  echo "DONE"
 else
-  echo "Error during setup."
+  echo "ERROR"
 fi
 echo "------------------------------------------"
 
