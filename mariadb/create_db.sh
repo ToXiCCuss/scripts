@@ -16,8 +16,8 @@ DB_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 30)
 
 echo "------------------------------------------"
 echo "Creating Database: $DB_NAME"
-echo "Creating User:     $DB_USER"
 echo "Roles:             $ROLE_RO, $ROLE_RW, $ROLE_OWNER"
+echo "Creating User:     $DB_USER"
 echo "Password:          $DB_PASS"
 echo "------------------------------------------"
 
