@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Configuration
 DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1405990393048469554/DsxwaBO38HDaxkwNYwRiePvKvPv35Mxu83OBxC_QWIwYvqUgi4DhbFwz2LuHAr6C9AG8"
 DISCORD_ERROR_TITLE="MongoDB Logical Backup"
 DISCORD_USER_ID="261598730027925505"
@@ -31,7 +30,7 @@ send_discord_error() {
                         \"inline\": true
                     },
                     {
-                        \"name\": \"🕐 Zeit\",
+                        \"name\": \"🕐 Time\",
                         \"value\": \"$timestamp\",
                         \"inline\": true
                     }
@@ -45,7 +44,6 @@ echo "[INFO] Creating temporary backup folder..."
 mkdir -p "$BACKUP_DIR/$DATE"
 
 echo "[INFO] Starting mongodump..."
-# Falls Authentifizierung aktiv ist, können ADMIN_USER und ADMIN_PASS hier geladen werden
 CONFIG_FILE="/etc/mongodb-admin.cred"
 AUTH_ARGS=""
 if [ -f "$CONFIG_FILE" ]; then
@@ -55,8 +53,6 @@ if [ -f "$CONFIG_FILE" ]; then
     fi
 fi
 
-# mongodump without credentials assumes localhost access or configured auth in environment/config
-# It will dump all databases to the specified directory.
 mongodump $AUTH_ARGS --out "$BACKUP_DIR/$DATE" --quiet
 
 if [ $? -ne 0 ]; then
@@ -68,7 +64,6 @@ fi
 echo "[INFO] Dump created in: $BACKUP_DIR/$DATE"
 
 echo "[INFO] Starting Restic backup..."
-# Verify if restic is available
 if command -v restic >/dev/null 2>&1; then
     restic -r "$RESTIC_REPOSITORY" \
         --password-file "$RESTIC_PASSWORD_FILE" \
@@ -83,7 +78,6 @@ else
     echo "[WARN] Restic not found, skipping remote backup."
 fi
 
-# Cleanup local dumps (optional, depending on retention policy)
 rm -rf "$BACKUP_DIR/$DATE"
 echo "[INFO] Local temporary dumps deleted."
 

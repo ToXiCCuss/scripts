@@ -1,22 +1,18 @@
 #!/bin/bash
 set -e
 
-# Node Exporter auf Debian 13 (Trixie) einrichten
-
 if [ "$EUID" -ne 0 ]; then
-  echo "Bitte führen Sie dieses Skript als root aus!"
+  echo "Please run this script as root!"
   exit 1
 fi
 
 LISTEN_ADDRESS="${LISTEN_ADDRESS:-0.0.0.0:9100}"
 
-echo "Installiere prometheus-node-exporter..."
+echo "Installing prometheus-node-exporter..."
 apt update
 apt install -y prometheus-node-exporter
 
-echo "Konfiguriere Node Exporter (falls nötig)..."
-# Die Standardkonfiguration unter Debian nutzt /etc/default/prometheus-node-exporter
-# Wir passen die LISTEN_ADDRESS an.
+echo "Configuring Node Exporter..."
 
 cat > /etc/default/prometheus-node-exporter <<EOF
 ARGS="--web.listen-address=${LISTEN_ADDRESS} \
@@ -26,9 +22,9 @@ ARGS="--web.listen-address=${LISTEN_ADDRESS} \
 --collector.systemd"
 EOF
 
-echo "Starte und aktiviere Node Exporter Dienst..."
+echo "Starting and enabling Node Exporter service..."
 systemctl restart prometheus-node-exporter
 systemctl enable prometheus-node-exporter
 
-echo "Node Exporter Setup abgeschlossen!"
+echo "Node Exporter setup completed!"
 echo "Listening on: ${LISTEN_ADDRESS}"

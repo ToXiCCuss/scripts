@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Prüfen, ob ein Username übergeben wurde, sonst Standard 'admin'
 ADMIN_USER=${1:-admin}
 
-# Prüfen, ob ein Passwort übergeben wurde, sonst ein zufälliges generieren
 if [ -z "$2" ]; then
   ADMIN_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 30)
 else
@@ -15,10 +13,6 @@ echo "------------------------------------------"
 echo "Username: $ADMIN_USER"
 echo "Password: $ADMIN_PASS"
 echo "------------------------------------------"
-
-# Erstellen des Benutzers in der 'admin' Datenbank mit der Rolle 'root'
-# Dies nutzt die Localhost-Exception von MongoDB, falls keine Authentifizierung aktiv ist.
-# Falls der User bereits existiert, wird ein Fehler gemeldet.
 
 mongosh admin --quiet <<EOF
 db.createUser({
@@ -35,11 +29,9 @@ if [ $? -eq 0 ]; then
   echo "Admin user successfully created."
   echo ""
 
-  # Automatische Erstellung der Credential-Datei
   CONFIG_FILE="/etc/mongodb-admin.cred"
   echo "[INFO] Creating credential file: $CONFIG_FILE"
   
-  # Versuche die Datei zu schreiben (benötigt root)
   if sudo bash -c "cat <<EOF > $CONFIG_FILE
 ADMIN_USER=\"$ADMIN_USER\"
 ADMIN_PASS=\"$ADMIN_PASS\"

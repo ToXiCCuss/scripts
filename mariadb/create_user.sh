@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Check if required arguments are provided
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
   echo "Usage: $0 <database_name> <new_username> <role_type: ro|rw|owner>"
   exit 1
@@ -10,7 +9,6 @@ DB_NAME=$1
 NEW_USER="${DB_NAME}_$2"
 ROLE_TYPE=$3
 
-# Determine target role based on input
 case $ROLE_TYPE in
   ro)
     TARGET_ROLE="${DB_NAME}_role_ro"
@@ -27,7 +25,6 @@ case $ROLE_TYPE in
     ;;
 esac
 
-# --- AUTOMATISCHE PASSWORT-GENERIERUNG ---
 USER_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 30)
 
 echo "Creating MariaDB User: $NEW_USER"
@@ -36,13 +33,10 @@ echo "Assigning Role:        $TARGET_ROLE"
 echo "------------------------------------------"
 
 mariadb -u root <<EOF
-  -- Create the user with login permissions
   CREATE USER IF NOT EXISTS "$NEW_USER"@'%' IDENTIFIED BY '$USER_PASS';
 
-  -- Grant the specific role to the user
   GRANT "$TARGET_ROLE" TO "$NEW_USER"@'%';
 
-  -- Set the role as default so it's active upon login
   SET DEFAULT ROLE "$TARGET_ROLE" FOR "$NEW_USER"@'%';
 
   FLUSH PRIVILEGES;

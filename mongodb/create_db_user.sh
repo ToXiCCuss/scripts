@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Prüfen, ob ein Datenbankname übergeben wurde
 if [ -z "$1" ]; then
   echo "Usage: $0 <database_name>"
   exit 1
@@ -10,7 +9,6 @@ DB_NAME=$1
 DB_USER="${DB_NAME}_owner"
 ROLES_JSON="{ role: \"dbOwner\", db: \"$DB_NAME\" }"
 
-# Generiert ein zufälliges 30-stelliges Passwort
 DB_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 30)
 
 echo "Creating Database: $DB_NAME"
@@ -19,8 +17,6 @@ echo "Role:              dbOwner"
 echo "Password:          $DB_PASS"
 echo "------------------------------------------"
 
-# MongoDB Befehle ausführen
-# Falls Authentifizierung aktiv ist, können ADMIN_USER und ADMIN_PASS hier geladen werden
 CONFIG_FILE="/etc/mongodb-admin.cred"
 AUTH_ARGS=""
 if [ -f "$CONFIG_FILE" ]; then
@@ -30,7 +26,6 @@ if [ -f "$CONFIG_FILE" ]; then
     fi
 fi
 
-# Nutzt die Localhost-Exception oder setzt voraus, dass der User Admin-Rechte hat
 mongosh $AUTH_ARGS --quiet <<EOF
 use $DB_NAME
 db.createUser({

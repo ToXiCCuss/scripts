@@ -1,55 +1,55 @@
 = Scripts
 
-Sammlung von Bash-Skripten zur Serververwaltung und Datenbankadministration.
+Collection of Bash scripts for server management and database administration.
 
 == General
-Hilfsskripte für die Verwaltung des Repositories.
+Helper scripts for repository management.
 
-* `Git set permissions windows`: Setzt das Execute-Bit für Shell-Skripte unter Windows.
+* `Git set permissions windows`: Sets the execute bit for shell scripts under Windows.
 [source,powershell]
 ----
 Get-ChildItem -Recurse -Filter *.sh | ForEach-Object { git update-index --chmod=+x $_.FullName }
 ----
 
 == Linux
-Allgemeine System-Skripte für Linux.
+General system scripts for Linux.
 
-* `apt-update-checker.sh`: Prüft auf Updates und sendet Discord-Benachrichtigungen.
-* `copy_dir.sh`: Kopiert Verzeichnisse.
-* `discord.sh`: Hilfsskript für Discord-Fehlermeldungen.
-* `file_backup.sh`: Erstellt Datei-Backups.
-* `setup_node_exporter.sh`: Installiert den Prometheus Node Exporter.
+* `apt-update-checker.sh`: Checks for updates and sends Discord notifications.
+* `copy_dir.sh`: Copies directories.
+* `discord.sh`: Helper script for Discord error messages.
+* `file_backup.sh`: Creates file backups.
+* `setup_node_exporter.sh`: Installs the Prometheus Node Exporter.
 
 == MariaDB
-Verwaltung, Backup und Monitoring für MariaDB.
+Management, backup and monitoring for MariaDB.
 
-* `cleanup_db.sh`: Entfernt Datenbanken.
-* `copy_db.sh`: Kopiert Datenbanken.
-* `create_db.sh` / `create_user.sh`: Erstellt DBs und Benutzer.
-* `reset_password.sh`: Setzt Benutzerpasswörter zurück.
-* `mariadb_pb.sh`: Physisches Backup (mariabackup + restic).
-* `mariadb_lb.sh`: Logisches Backup (mariadb-dump + restic).
-* `setup_exporter.sh`: Installiert den MariaDB Prometheus Exporter.
+* `cleanup_db.sh`: Removes databases.
+* `copy_db.sh`: Copies databases.
+* `create_db.sh` / `create_user.sh`: Creates DBs and users.
+* `reset_password.sh`: Resets user passwords.
+* `mariadb_pb.sh`: Physical backup (mariabackup + restic).
+* `mariadb_lb.sh`: Logical backup (mariadb-dump + restic).
+* `setup_exporter.sh`: Installs the MariaDB Prometheus Exporter.
 
 == MongoDB
-Verwaltung, Backup und Monitoring für MongoDB.
+Management, backup and monitoring for MongoDB.
 
-* `cleanup_db_user.sh`: Entfernt Datenbankbenutzer.
-* `create_db_user.sh` / `create_user.sh`: Erstellt Benutzer.
-* `reset_password.sh`: Setzt Benutzerpasswörter zurück.
-* `mongodb_pb.sh`: Physisches Backup.
-* `mongodb_lb.sh`: Logisches Backup (mongodump).
-* `setup_admin.sh`: Initiales Admin-Setup.
-* `setup_exporter.sh`: Installiert den MongoDB Prometheus Exporter.
+* `cleanup_db_user.sh`: Removes database users.
+* `create_db_user.sh` / `create_user.sh`: Creates users.
+* `reset_password.sh`: Resets user passwords.
+* `mongodb_pb.sh`: Physical backup.
+* `mongodb_lb.sh`: Logical backup (mongodump).
+* `setup_admin.sh`: Initial admin setup.
+* `setup_exporter.sh`: Installs the MongoDB Prometheus Exporter.
 
 == PostgreSQL
-Verwaltung, Backup und Monitoring für PostgreSQL.
+Management, backup and monitoring for PostgreSQL.
 
-* `change_user_password.sh`: Ändert Benutzerpasswörter.
-* `cleanup_db.sh`: Entfernt Datenbanken.
-* `cleanup_exporter.sh`: Deinstalliert den Exporter.
-* `create_db.sh` / `create_schema.sh` / `create_user.sh`: Initialisierungsskripte.
-* `postgresql_pb.sh`: Physisches Backup.
-* `postgresql_lb.sh`: Logisches Backup (pg_dump).
-* `setup_exporter.sh`: Installiert den Postgres Prometheus Exporter.
+* `change_user_password.sh`: Changes user passwords.
+* `cleanup_db.sh`: Removes databases.
+* `cleanup_exporter.sh`: Uninstalls the exporter.
+* `create_db.sh` / `create_schema.sh` / `create_user.sh`: Initialization scripts.
+* `postgresql_pb.sh`: Physical backup.
+* `postgresql_lb.sh`: Logical backup (pg_dump).
+* `setup_exporter.sh`: Installs the Postgres Prometheus Exporter.
 

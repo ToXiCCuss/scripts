@@ -1,19 +1,4 @@
 #!/bin/bash
-# copy_dir.sh - Safely sync a source directory into a target directory on Debian/Linux
-# 1) Deletes contents of target directory
-# 2) Copies all files from source to target
-# 3) Recursively sets ownership (uid:gid) on the target
-#
-# Configurable via CLI flags or environment variables:
-#   -s, --source   | SOURCE_DIR : path to source directory (required)
-#   -t, --target   | TARGET_DIR : path to target directory (required)
-#   -o, --owner    | OWNER      : owner spec uid:gid or user:group (required)
-#   -h, --help                   : show help
-#
-# Exit codes:
-#   0 OK
-#   1 Usage or validation error
-#   2 Runtime error during delete/copy/chown
 
 set -Eeuo pipefail
 IFS=$'\n\t'
@@ -40,7 +25,6 @@ Environment variables (alternatives to flags):
 EOF
 }
 
-# Parse arguments
 SOURCE_DIR="${SOURCE_DIR:-}"
 TARGET_DIR="${TARGET_DIR:-}"
 OWNER="${OWNER:-}"
@@ -57,36 +41,30 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-# Validate required parameters
 if [ -z "${SOURCE_DIR}" ] || [ -z "${TARGET_DIR}" ] || [ -z "${OWNER}" ]; then
   log_err "Missing required arguments."
   show_help
   exit 1
 fi
 
-# Resolve to absolute paths
 SOURCE_DIR="$(readlink -f -- "$SOURCE_DIR")" || true
 TARGET_DIR="$(readlink -f -- "$TARGET_DIR" 2>/dev/null || echo "$TARGET_DIR")"
 
-# Validate directories
 if [ ! -d "$SOURCE_DIR" ]; then
   log_err "Source directory does not exist or is not a directory: $SOURCE_DIR"
   exit 1
 fi
 
-# Create target if missing
 if [ ! -d "$TARGET_DIR" ]; then
   log "Creating target directory: $TARGET_DIR"
   mkdir -p -- "$TARGET_DIR"
 fi
 
-# Prevent dangerous operations
 if [ "$TARGET_DIR" = "/" ] || [ "$TARGET_DIR" = "/root" ]; then
   log_err "Refusing to operate on critical directory: $TARGET_DIR"
   exit 1
 fi
 
-# Resolve UID/GID from OWNER spec
 resolve_id() {
   local type="$1" value="$2" resolved=""
   if [[ "$value" =~ ^[0-9]+$ ]]; then
@@ -105,7 +83,6 @@ resolve_id() {
   echo "$resolved"
 }
 
-# Split OWNER into user:group or uid:gid
 OWNER_USER_PART="${OWNER%%:*}"
 OWNER_GROUP_PART="${OWNER##*:}"
 if [ -z "$OWNER_USER_PART" ] || [ -z "$OWNER_GROUP_PART" ] || [ "$OWNER" = "$OWNER_USER_PART" ]; then
@@ -120,16 +97,12 @@ log "Source: $SOURCE_DIR"
 log "Target: $TARGET_DIR"
 log "Owner:  $UID_NUM:$GID_NUM (from input '$OWNER')"
 
-# Proceed with operation (no interactive confirmation)
-
-# 1) Delete contents of target directory (not the directory itself)
 log "Deleting contents of target directory: $TARGET_DIR"
 if ! find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; then
   log_err "Failed to delete contents of $TARGET_DIR"
   exit 2
 fi
 
-# 2) Copy files from source to target
 copy_with_rsync() {
   if command -v rsync >/dev/null 2>&1; then
     rsync -aHAX --delete --numeric-ids "$SOURCE_DIR/" "$TARGET_DIR/"
@@ -144,7 +117,6 @@ if ! copy_with_rsync; then
   exit 2
 fi
 
-# 3) Recursively set ownership
 log "Setting ownership recursively on target"
 if ! chown -R -- "${UID_NUM}:${GID_NUM}" "$TARGET_DIR"; then
   log_err "Failed to chown $TARGET_DIR"

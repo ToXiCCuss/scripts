@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Prüfen auf erforderliche Parameter
 if [ -z "$1" ] || [ -z "$2" ]; then
   echo "Usage: $0 <database_name> <username> [role1 role2 ...]"
   echo "Common roles: ro (read), rw (readWrite), owner (dbOwner), dbAdmin, userAdmin"
@@ -12,7 +11,6 @@ DB_USER=$2
 shift 2
 ROLES_RAW=("$@")
 
-# Interaktive Auswahl, wenn keine Rollen angegeben wurden und wir in einem Terminal sind
 if [ ${#ROLES_RAW[@]} -eq 0 ] && [ -t 0 ]; then
     echo "No roles specified. Please select a role for '$DB_USER' on database '$DB_NAME':"
     options=("readWrite (rw)" "read (ro)" "dbOwner (owner)" "dbAdmin" "userAdmin" "Custom...")
@@ -40,12 +38,10 @@ if [ ${#ROLES_RAW[@]} -eq 0 ] && [ -t 0 ]; then
     done
 fi
 
-# Fallback auf Standard, falls immer noch leer (z.B. kein Terminal)
 if [ ${#ROLES_RAW[@]} -eq 0 ]; then
     ROLES_RAW=("readWrite")
 fi
 
-# Rollen-Mapping (ro/rw/owner -> MongoDB Standard)
 ROLES=()
 for r in "${ROLES_RAW[@]}"; do
     case $r in
@@ -56,7 +52,6 @@ for r in "${ROLES_RAW[@]}"; do
     esac
 done
 
-# Rollen-Array für mongosh JSON vorbereiten
 ROLES_JSON=""
 for role in "${ROLES[@]}"; do
     if [ -n "$ROLES_JSON" ]; then
@@ -65,7 +60,6 @@ for role in "${ROLES[@]}"; do
     ROLES_JSON="$ROLES_JSON { role: \"$role\", db: \"$DB_NAME\" }"
 done
 
-# Generiert ein zufälliges 30-stelliges Passwort
 DB_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 30)
 
 echo "Database:  $DB_NAME"
@@ -74,8 +68,6 @@ echo "Roles:     ${ROLES[*]}"
 echo "Password:  $DB_PASS"
 echo "------------------------------------------"
 
-# MongoDB Befehle ausführen
-# Falls Authentifizierung aktiv ist, können ADMIN_USER und ADMIN_PASS hier geladen werden
 CONFIG_FILE="/etc/mongodb-admin.cred"
 AUTH_ARGS=""
 if [ -f "$CONFIG_FILE" ]; then
@@ -85,7 +77,6 @@ if [ -f "$CONFIG_FILE" ]; then
     fi
 fi
 
-# Nutzt die Localhost-Exception oder setzt voraus, dass der User Admin-Rechte hat
 mongosh $AUTH_ARGS --quiet <<EOF
 use $DB_NAME
 db.createUser({

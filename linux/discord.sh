@@ -24,7 +24,7 @@ send_discord_error() {
                         \"inline\": true
                     },
                     {
-                        \"name\": \"🕐 Zeit\",
+                        \"name\": \"🕐 Time\",
                         \"value\": \"$timestamp\",
                         \"inline\": true
                     }
