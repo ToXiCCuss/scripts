@@ -9,7 +9,7 @@ fi
 EXPORTER_USER="mongodb_exporter"
 EXPORTER_PASSWORD="${EXPORTER_PASSWORD:-$(openssl rand -base64 24 | tr -dc 'a-zA-Z0-9' | head -c 32)}"
 LISTEN_ADDRESS="${LISTEN_ADDRESS:-0.0.0.0:9216}"
-MONGODB_URI="${MONGODB_URI:-mongodb://localhost:27017}"
+MONGODB_URI="${MONGODB_URI:-mongodb://127.0.0.1:27017}"
 
 echo "Installing prometheus-mongodb-exporter..."
 apt update
@@ -40,9 +40,10 @@ EOF
 
 echo "Configuring prometheus-mongodb-exporter..."
 
+MONGODB_URI="mongodb://${EXPORTER_USER}:${EXPORTER_PASSWORD}@127.0.0.1:27017/admin?authSource=admin&directConnection=true"
 cat > /etc/default/prometheus-mongodb-exporter <<EOF
-MONGODB_URI="mongodb://${EXPORTER_USER}:${EXPORTER_PASSWORD}@localhost:27017/admin?authSource=admin"
-ARGS="--web.listen-address=${LISTEN_ADDRESS}"
+MONGODB_URI="${MONGODB_URI}"
+ARGS="--mongodb.uri=${MONGODB_URI} --web.listen-address=${LISTEN_ADDRESS}"
 EOF
 
 echo "Starting and enabling prometheus-mongodb-exporter service..."

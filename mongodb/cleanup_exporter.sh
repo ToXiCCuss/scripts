@@ -1,0 +1,62 @@
+#!/bin/bash
+set -e
+
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run this script as root!"
+  exit 1
+fi
+
+EXPORTER_USER="mongodb_exporter"
+
+echo "=========================================="
+echo "MongoDB Exporter Cleanup"
+echo "=========================================="
+echo ""
+
+echo "Stopping prometheus-mongodb-exporter service..."
+systemctl stop prometheus-mongodb-exporter || true
+systemctl disable prometheus-mongodb-exporter || true
+
+echo "Removing prometheus-mongodb-exporter package..."
+apt remove -y prometheus-mongodb-exporter || true
+apt purge -y prometheus-mongodb-exporter || true
+
+echo "Removing configuration files..."
+rm -f /etc/default/prometheus-mongodb-exporter
+
+echo "Removing MongoDB user '${EXPORTER_USER}' from 'admin' database..."
+
+CONFIG_FILE="/etc/mongodb-admin.cred"
+AUTH_ARGS=""
+if [ -f "$CONFIG_FILE" ]; then
+    source "$CONFIG_FILE"
+    if [ -n "$ADMIN_USER" ] && [ -n "$ADMIN_PASS" ]; then
+        AUTH_ARGS="-u $ADMIN_USER -p $ADMIN_PASS --authenticationDatabase admin"
+    fi
+fi
+
+# Run MongoDB command to drop the user
+# We ignore errors in case the user was already removed or mongosh is not available
+if command -v mongosh &> /dev/null; then
+    mongosh $AUTH_ARGS --quiet <<EOF
+use admin
+db.dropUser("${EXPORTER_USER}")
+EOF
+    if [ $? -eq 0 ]; then
+        echo "User '${EXPORTER_USER}' deleted successfully."
+    else
+        echo "Error deleting user or user did not exist."
+    fi
+else
+    echo "mongosh not found. Could not remove MongoDB user automatically."
+fi
+
+echo ""
+echo "=========================================="
+echo "Cleanup Complete"
+echo "=========================================="
+echo "The following items have been removed:"
+echo "  - prometheus-mongodb-exporter service"
+echo "  - Configuration files"
+echo "  - MongoDB user '${EXPORTER_USER}' (if it existed)"
+echo "=========================================="
