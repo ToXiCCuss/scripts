@@ -13,16 +13,22 @@ echo "MongoDB Exporter Cleanup"
 echo "=========================================="
 echo ""
 
-echo "Stopping prometheus-mongodb-exporter service..."
+echo "Stopping and removing services..."
+systemctl stop mongodb_exporter || true
+systemctl disable mongodb_exporter || true
 systemctl stop prometheus-mongodb-exporter || true
 systemctl disable prometheus-mongodb-exporter || true
 
-echo "Removing prometheus-mongodb-exporter package..."
+echo "Removing binaries and packages..."
+rm -f /usr/local/bin/mongodb_exporter
 apt remove -y prometheus-mongodb-exporter || true
 apt purge -y prometheus-mongodb-exporter || true
 
-echo "Removing configuration files..."
+echo "Removing configuration and service files..."
+rm -f /etc/default/mongodb_exporter
 rm -f /etc/default/prometheus-mongodb-exporter
+rm -f /etc/systemd/system/mongodb_exporter.service
+systemctl daemon-reload
 
 echo "Removing MongoDB user '${EXPORTER_USER}' from 'admin' database..."
 
@@ -56,7 +62,7 @@ echo "=========================================="
 echo "Cleanup Complete"
 echo "=========================================="
 echo "The following items have been removed:"
-echo "  - prometheus-mongodb-exporter service"
-echo "  - Configuration files"
+echo "  - mongodb_exporter service and binary"
+echo "  - Configuration and service files"
 echo "  - MongoDB user '${EXPORTER_USER}' (if it existed)"
 echo "=========================================="
