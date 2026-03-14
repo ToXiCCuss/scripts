@@ -94,7 +94,7 @@ After=network.target
 User=prometheus
 Group=prometheus
 EnvironmentFile=/etc/default/mongodb_exporter
-ExecStart=/usr/local/bin/mongodb_exporter --mongodb.uri=\${MONGODB_URI} --web.listen-address=\${LISTEN_ADDRESS}
+ExecStart=/usr/local/bin/mongodb_exporter --mongodb.uri=\${MONGODB_URI} --web.listen-address=\${LISTEN_ADDRESS} --collect-all
 Restart=always
 
 [Install]
