@@ -1,0 +1,55 @@
+= Scripts
+
+Sammlung von Bash-Skripten zur Serververwaltung und Datenbankadministration.
+
+== General
+Hilfsskripte für die Verwaltung des Repositories.
+
+* `Git set permissions windows`: Setzt das Execute-Bit für Shell-Skripte unter Windows.
+[source,powershell]
+----
+Get-ChildItem -Recurse -Filter *.sh | ForEach-Object { git update-index --chmod=+x $_.FullName }
+----
+
+== Linux
+Allgemeine System-Skripte für Linux.
+
+* `apt-update-checker.sh`: Prüft auf Updates und sendet Discord-Benachrichtigungen.
+* `copy_dir.sh`: Kopiert Verzeichnisse.
+* `discord.sh`: Hilfsskript für Discord-Fehlermeldungen.
+* `file_backup.sh`: Erstellt Datei-Backups.
+* `setup_node_exporter.sh`: Installiert den Prometheus Node Exporter.
+
+== MariaDB
+Verwaltung, Backup und Monitoring für MariaDB.
+
+* `cleanup_db.sh`: Entfernt Datenbanken.
+* `copy_db.sh`: Kopiert Datenbanken.
+* `create_db.sh` / `create_user.sh`: Erstellt DBs und Benutzer.
+* `reset_password.sh`: Setzt Benutzerpasswörter zurück.
+* `mariadb_pb.sh`: Physisches Backup (mariabackup + restic).
+* `mariadb_lb.sh`: Logisches Backup (mariadb-dump + restic).
+* `setup_exporter.sh`: Installiert den MariaDB Prometheus Exporter.
+
+== MongoDB
+Verwaltung, Backup und Monitoring für MongoDB.
+
+* `cleanup_db_user.sh`: Entfernt Datenbankbenutzer.
+* `create_db_user.sh` / `create_user.sh`: Erstellt Benutzer.
+* `reset_password.sh`: Setzt Benutzerpasswörter zurück.
+* `mongodb_pb.sh`: Physisches Backup.
+* `mongodb_lb.sh`: Logisches Backup (mongodump).
+* `setup_admin.sh`: Initiales Admin-Setup.
+* `setup_exporter.sh`: Installiert den MongoDB Prometheus Exporter.
+
+== PostgreSQL
+Verwaltung, Backup und Monitoring für PostgreSQL.
+
+* `change_user_password.sh`: Ändert Benutzerpasswörter.
+* `cleanup_db.sh`: Entfernt Datenbanken.
+* `cleanup_exporter.sh`: Deinstalliert den Exporter.
+* `create_db.sh` / `create_schema.sh` / `create_user.sh`: Initialisierungsskripte.
+* `postgresql_pb.sh`: Physisches Backup.
+* `postgresql_lb.sh`: Logisches Backup (pg_dump).
+* `setup_exporter.sh`: Installiert den Postgres Prometheus Exporter.
+
