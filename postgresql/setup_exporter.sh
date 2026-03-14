@@ -13,10 +13,34 @@ echo "Creating PostgreSQL user for exporter..."
 sudo -u postgres psql -c "CREATE USER prometheus WITH PASSWORD '${EXPORTER_PASSWORD}';"
 sudo -u postgres psql -c "GRANT pg_monitor TO prometheus;"
 
+echo "Enabling pg_stat_statements extension..."
+sudo -u postgres psql -d ${DB_NAME} -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
+
 echo "Configuring postgres_exporter..."
 cat > /etc/default/prometheus-postgres-exporter <<EOF
 DATA_SOURCE_NAME="postgresql://prometheus:${EXPORTER_PASSWORD}@localhost:5432/${DB_NAME}?sslmode=disable"
-ARGS="--collector.stat_checkpointer --web.listen-address=${LISTEN_ADDRESS}"
+ARGS="--web.listen-address=${LISTEN_ADDRESS} \
+--web.telemetry-path=/metrics \
+--collector.database \
+--collector.database_wraparound \
+--collector.locks \
+--collector.long_running_transactions \
+--collector.postmaster \
+--collector.process_idle \
+--collector.replication \
+--collector.replication_slot \
+--collector.roles \
+--collector.stat_activity_autovacuum \
+--collector.stat_bgwriter \
+--collector.stat_checkpointer \
+--collector.stat_database \
+--collector.stat_statements \
+--collector.stat_user_tables \
+--collector.stat_wal_receiver \
+--collector.statio_user_indexes \
+--collector.statio_user_tables \
+--collector.wal \
+--collector.xlog_location
 EOF
 
 systemctl restart prometheus-postgres-exporter
