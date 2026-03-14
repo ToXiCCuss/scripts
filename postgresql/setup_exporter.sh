@@ -1,7 +1,26 @@
 #!/bin/bash
 set -e
 
+h # URL-encode function
+urlencode() {
+    local string="${1}"
+    local strlen=${#string}
+    local encoded=""
+    local pos c o
+
+    for (( pos=0 ; pos<strlen ; pos++ )); do
+        c=${string:$pos:1}
+        case "$c" in
+            [-_.~a-zA-Z0-9] ) o="${c}" ;;
+            * ) printf -v o '%%%02x' "'$c"
+        esac
+        encoded+="${o}"
+    done
+    echo "${encoded}"
+}
+
 EXPORTER_PASSWORD="${EXPORTER_PASSWORD:-$(openssl rand -base64 32)}"
+EXPORTER_PASSWORD_ENCODED=$(urlencode "${EXPORTER_PASSWORD}")
 DB_NAME="${DB_NAME:-postgres}"
 LISTEN_ADDRESS="${LISTEN_ADDRESS:-0.0.0.0:9187}"
 
