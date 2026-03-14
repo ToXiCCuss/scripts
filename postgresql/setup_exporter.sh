@@ -37,9 +37,10 @@ sudo -u postgres psql -d ${DB_NAME} -c "CREATE EXTENSION IF NOT EXISTS pg_stat_s
 
 echo "Configuring postgres_exporter..."
 cat > /etc/default/prometheus-postgres-exporter <<EOF
-DATA_SOURCE_NAME="postgresql://prometheus:${EXPORTER_PASSWORD}@localhost:5432/${DB_NAME}?sslmode=disable"
+DATA_SOURCE_NAME="postgresql://prometheus:${EXPORTER_PASSWORD_ENCODED}@localhost:5432/${DB_NAME}?sslmode=disable"
 ARGS="--web.listen-address=${LISTEN_ADDRESS} \
 --web.telemetry-path=/metrics \
+--exclude-databases=template0,template1 \
 --collector.database \
 --collector.database_wraparound \
 --collector.locks \
@@ -59,7 +60,9 @@ ARGS="--web.listen-address=${LISTEN_ADDRESS} \
 --collector.statio_user_indexes \
 --collector.statio_user_tables \
 --collector.wal \
---collector.xlog_location
+--collector.xlog_location \
+--log.level=info \
+--log.format=logfmt"
 EOF
 
 systemctl restart prometheus-postgres-exporter
