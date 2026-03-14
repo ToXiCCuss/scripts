@@ -30,6 +30,7 @@ apt install -y prometheus-postgres-exporter
 echo "Creating PostgreSQL user for exporter..."
 sudo -u postgres psql -c "CREATE USER prometheus WITH PASSWORD '${EXPORTER_PASSWORD}';"
 sudo -u postgres psql -c "GRANT pg_monitor TO prometheus;"
+sudo -u postgres psql -c "GRANT CONNECT ON DATABASE ${DB_NAME} TO prometheus;"
 
 echo "Enabling pg_stat_statements extension..."
 sudo -u postgres psql -d ${DB_NAME} -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
