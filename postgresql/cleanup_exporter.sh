@@ -20,6 +20,8 @@ echo "Removing configuration files..."
 rm -f /etc/default/prometheus-postgres-exporter
 
 # Drop PostgreSQL user
+echo "Revoking privileges for PostgreSQL user 'prometheus'..."
+sudo -u postgres psql -d postgres -c "REVOKE ALL PRIVILEGES ON DATABASE postgres FROM prometheus;" || true
 echo "Dropping PostgreSQL user 'prometheus'..."
 sudo -u postgres psql -c "DROP USER IF EXISTS prometheus;" || true
 
