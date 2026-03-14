@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-h # URL-encode function
 urlencode() {
     local string="${1}"
     local strlen=${#string}
