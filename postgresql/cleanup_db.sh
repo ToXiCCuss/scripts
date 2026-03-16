@@ -12,6 +12,7 @@ ROLE_RO="${DB_NAME}_role_ro"
 ROLE_RW="${DB_NAME}_role_rw"
 ROLE_OWNER="${DB_NAME}_role_owner"
 
+echo "------------------------------------------"
 echo "Starting cleanup for database: $DB_NAME"
 echo "------------------------------------------"
 

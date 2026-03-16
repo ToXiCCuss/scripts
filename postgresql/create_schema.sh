@@ -12,6 +12,7 @@ ROLE_RO="${DB_NAME}_role_ro"
 ROLE_RW="${DB_NAME}_role_rw"
 ROLE_OWNER="${DB_NAME}_role_owner"
 
+echo "--------------------------------------------------------"
 echo "Creating schema '$SCHEMA_NAME' in database '$DB_NAME'..."
 echo "Setting permissions for $ROLE_RO, $ROLE_RW, and $ROLE_OWNER."
 echo "--------------------------------------------------------"

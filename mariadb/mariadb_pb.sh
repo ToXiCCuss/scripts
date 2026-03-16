@@ -41,6 +41,8 @@ send_discord_error() {
 }
 
 
+echo "----------------------------------------------------------------------"
+echo "[INFO] Starting MariaDB physical backup process..."
 echo "[INFO] Creating incremental backup..."
 mariabackup --backup \
     --target-dir="$INC_DIR" \
@@ -77,4 +79,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo "----------------------------------------------------------------------"
 echo "[INFO] Backup completed successfully."
+echo "----------------------------------------------------------------------"

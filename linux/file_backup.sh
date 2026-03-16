@@ -55,6 +55,8 @@ export RCLONE_CHUNK_SIZE=5M
 export RCLONE_BUFFER_SIZE=32M
 export RCLONE_USE_MMAP=true
 
+echo "----------------------------------------------------------------------"
+echo "[INFO] Starting file backup process..."
 restic -r $RESTIC_REPO unlock --password-file $PASSWORD_FILE
 
 BACKUP_COMMAND="restic -r $RESTIC_REPO backup --password-file $PASSWORD_FILE"
@@ -68,7 +70,9 @@ for exclude in "${EXCLUDE_PATHS[@]}"; do
 done
 
 if eval $BACKUP_COMMAND; then
+    echo "----------------------------------------------------------------------"
     echo "Backup completed successfully"
+    echo "----------------------------------------------------------------------"
 else
     BACKUP_ERROR=$?
     echo "Backup failed with exit code $BACKUP_ERROR"

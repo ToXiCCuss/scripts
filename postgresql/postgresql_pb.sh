@@ -40,6 +40,7 @@ send_discord_error() {
          "$DISCORD_WEBHOOK_URL"
 }
 
+echo "----------------------------------------------------------------------"
 echo "[INFO] Starting smart PostgreSQL backup process..."
 
 echo "[INFO] Creating differential backup..."
@@ -79,4 +80,6 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+echo "----------------------------------------------------------------------"
 echo "[INFO] PostgreSQL backup completed successfully!"
+echo "----------------------------------------------------------------------"

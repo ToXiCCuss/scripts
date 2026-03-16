@@ -13,6 +13,7 @@ fi
 
 USER_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 30)
 
+echo "------------------------------------------"
 echo "Updating Password for User: $USER_NAME"
 echo "New Password:              $USER_PASS"
 echo "------------------------------------------"

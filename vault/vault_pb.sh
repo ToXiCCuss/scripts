@@ -1,24 +1,26 @@
 #!/bin/bash
 
+# Configuration
 DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1405990393048469554/DsxwaBO38HDaxkwNYwRiePvKvPv35Mxu83OBxC_QWIwYvqUgi4DhbFwz2LuHAr6C9AG8"
-DISCORD_ERROR_TITLE="MongoDB Physical Backup"
+DISCORD_ERROR_TITLE="Vault Physical Backup"
 DISCORD_USER_ID="261598730027925505"
 
-CONFIG_FILE="/etc/mongodb-admin.cred"
-AUTH_ARGS=""
+# Authentifizierung laden
+CONFIG_FILE="/etc/vault-backup.cred"
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
-    if [ -n "$ADMIN_USER" ] && [ -n "$ADMIN_PASS" ]; then
-        AUTH_ARGS="-u $ADMIN_USER -p $ADMIN_PASS --authenticationDatabase admin"
-    fi
 fi
 
-RESTIC_REPOSITORY="rclone:pCloud:/Backups/mongodb_pb"
+export VAULT_ADDR=${VAULT_ADDR:-"http://127.0.0.1:8200"}
+export VAULT_TOKEN=${VAULT_TOKEN}
+# VAULT_TOKEN sollte in CONFIG_FILE definiert sein
+
+RESTIC_REPOSITORY="rclone:pCloud:/Backups/vault_pb"
 RESTIC_PASSWORD_FILE="/root/restic"
 
-BACKUP_DIR="/var/backups/mongodb/physical"
-MONGO_DATA_DIR="/var/lib/mongodb"
+BACKUP_DIR="/var/backups/vault/physical"
 DATE=$(date +"%Y-%m-%d_%H-%M")
+SNAPSHOT_FILE="$BACKUP_DIR/vault_snapshot_$DATE.snap"
 
 send_discord_error() {
     local error_message="$1"
@@ -40,7 +42,7 @@ send_discord_error() {
                         \"inline\": true
                     },
                     {
-                        \"name\": \"🕐 Time\",
+                        \"name\": \"🕐 Zeit\",
                         \"value\": \"$timestamp\",
                         \"inline\": true
                     }
@@ -51,42 +53,30 @@ send_discord_error() {
 }
 
 echo "----------------------------------------------------------------------"
-echo "[INFO] Starting physical backup process..."
+echo "[INFO] Starting Vault physical backup process..."
 
-echo "[INFO] Locking MongoDB (fsyncLock)..."
-mongosh $AUTH_ARGS --quiet --eval "db.fsyncLock()"
+# 1. Ensure Backup Directory exists
+mkdir -p "$BACKUP_DIR"
+
+# 2. Create Raft Snapshot
+# Note: For Vault backups using Raft, a snapshot is the standard way to create a consistent point-in-time backup.
+echo "[INFO] Creating Vault Raft snapshot..."
+vault operator raft snapshot save "$SNAPSHOT_FILE"
 
 if [ $? -ne 0 ]; then
-    echo "[ERROR] Failed to lock MongoDB"
-    send_discord_error "Failed to lock MongoDB"
+    echo "[ERROR] Failed to create Vault snapshot"
+    send_discord_error "Failed to create Vault snapshot"
     exit 1
 fi
 
-echo "[INFO] Creating local copy of data files..."
-mkdir -p "$BACKUP_DIR/$DATE"
-rsync -a "$MONGO_DATA_DIR/" "$BACKUP_DIR/$DATE/"
+echo "[INFO] Vault snapshot created: $SNAPSHOT_FILE"
 
-if [ $? -ne 0 ]; then
-    echo "[ERROR] Failed to copy data files"
-    send_discord_error "Failed to copy data files"
-    mongosh $AUTH_ARGS --quiet --eval "db.fsyncUnlock()"
-    exit 1
-fi
-
-echo "[INFO] Unlocking MongoDB..."
-mongosh $AUTH_ARGS --quiet --eval "db.fsyncUnlock()"
-
-if [ $? -ne 0 ]; then
-    echo "[ERROR] Failed to unlock MongoDB"
-    send_discord_error "Failed to unlock MongoDB"
-    exit 1
-fi
-
+# 3. Restic backup
 echo "[INFO] Starting Restic backup..."
 if command -v restic >/dev/null 2>&1; then
     restic -r "$RESTIC_REPOSITORY" \
         --password-file "$RESTIC_PASSWORD_FILE" \
-        backup "$BACKUP_DIR/$DATE"
+        backup "$SNAPSHOT_FILE"
 
     if [ $? -ne 0 ]; then
         echo "[ERROR] Restic backup failed"
@@ -97,7 +87,9 @@ else
     echo "[WARN] Restic not found, skipping remote backup."
 fi
 
-rm -rf "$BACKUP_DIR/$DATE"
+# 4. Cleanup local copy
+rm -f "$SNAPSHOT_FILE"
+
 echo "----------------------------------------------------------------------"
-echo "[INFO] Physical backup completed successfully."
+echo "[INFO] Vault physical backup completed successfully."
 echo "----------------------------------------------------------------------"

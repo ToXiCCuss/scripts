@@ -27,6 +27,7 @@ esac
 
 USER_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 30)
 
+echo "------------------------------------------"
 echo "Creating User: $NEW_USER"
 echo "Assigning Role: $TARGET_ROLE"
 echo "Password:      $USER_PASS"
@@ -45,3 +46,4 @@ if [ $? -eq 0 ]; then
 else
   echo "Error creating user."
 fi
+echo "------------------------------------------"
