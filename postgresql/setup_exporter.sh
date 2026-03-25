@@ -1,73 +1,30 @@
 #!/bin/bash
 set -e
 
-urlencode() {
-    local string="${1}"
-    local strlen=${#string}
-    local encoded=""
-    local pos c o
-
-    for (( pos=0 ; pos<strlen ; pos++ )); do
-        c=${string:$pos:1}
-        case "$c" in
-            [-_.~a-zA-Z0-9] ) o="${c}" ;;
-            * ) printf -v o '%%%02x' "'$c"
-        esac
-        encoded+="${o}"
-    done
-    echo "${encoded}"
-}
-
 EXPORTER_PASSWORD="${EXPORTER_PASSWORD:-$(openssl rand -base64 32)}"
-EXPORTER_PASSWORD_ENCODED=$(urlencode "${EXPORTER_PASSWORD}")
-DB_NAME="${DB_NAME:-postgres}"
-LISTEN_ADDRESS="${LISTEN_ADDRESS:-0.0.0.0:9187}"
 
-echo "Installing postgres_exporter..."
-apt update
-apt install -y prometheus-postgres-exporter
+echo "------------------------------------"
+echo "Creating PostgreSQL exporter user..."
+echo "------------------------------------"
 
-echo "Creating PostgreSQL user for exporter..."
-sudo -u postgres psql -c "CREATE USER prometheus WITH PASSWORD '${EXPORTER_PASSWORD}';"
-sudo -u postgres psql -c "GRANT pg_monitor TO prometheus;"
-sudo -u postgres psql -c "GRANT CONNECT ON DATABASE ${DB_NAME} TO prometheus;"
+sudo -u postgres psql <<SQL
+CREATE USER prometheus WITH PASSWORD '${EXPORTER_PASSWORD}';
+GRANT pg_monitor TO prometheus;
 
-echo "Enabling pg_stat_statements extension..."
-sudo -u postgres psql -d ${DB_NAME} -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
+DO \$\$
+DECLARE
+  db TEXT;
+BEGIN
+  FOR db IN SELECT datname FROM pg_database WHERE datistemplate = false LOOP
+    EXECUTE format('GRANT CONNECT ON DATABASE %I TO prometheus', db);
+  END LOOP;
+END;
+\$\$;
 
-echo "Configuring postgres_exporter..."
-cat > /etc/default/prometheus-postgres-exporter <<EOF
-DATA_SOURCE_NAME="postgresql://prometheus:${EXPORTER_PASSWORD_ENCODED}@localhost:5432/${DB_NAME}?sslmode=disable"
-ARGS="--web.listen-address=${LISTEN_ADDRESS} \
---web.telemetry-path=/metrics \
---exclude-databases=template0,template1 \
---collector.database \
---collector.database_wraparound \
---collector.locks \
---collector.long_running_transactions \
---collector.postmaster \
---collector.process_idle \
---collector.replication \
---collector.replication_slot \
---collector.roles \
---collector.stat_activity_autovacuum \
---collector.stat_bgwriter \
---collector.stat_checkpointer \
---collector.stat_database \
---collector.stat_statements \
---collector.stat_user_tables \
---collector.stat_wal_receiver \
---collector.statio_user_indexes \
---collector.statio_user_tables \
---collector.wal \
---collector.xlog_location \
---log.level=info \
---log.format=logfmt"
-EOF
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+SQL
 
-systemctl restart prometheus-postgres-exporter
-systemctl enable prometheus-postgres-exporter
-
-echo "postgres_exporter setup complete!"
+echo "------------------------------------"
+echo "Done!"
 echo "Password: ${EXPORTER_PASSWORD}"
-echo "Listening on: ${LISTEN_ADDRESS}"
+echo "------------------------------------"

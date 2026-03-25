@@ -1,37 +1,26 @@
 #!/bin/bash
 set -e
 
-echo "=========================================="
-echo "PostgreSQL Exporter Cleanup"
-echo "=========================================="
-echo ""
+echo "---------------------------------------"
+echo "Cleaning up PostgreSQL exporter user..."
+echo "---------------------------------------"
 
-echo "Stopping prometheus-postgres-exporter service..."
-systemctl stop prometheus-postgres-exporter || true
-systemctl disable prometheus-postgres-exporter || true
+sudo -u postgres psql <<SQL
+-- Revoke CONNECT von allen DBs
+DO \$\$
+DECLARE
+  db TEXT;
+BEGIN
+  FOR db IN SELECT datname FROM pg_database WHERE datistemplate = false LOOP
+    EXECUTE format('REVOKE CONNECT ON DATABASE %I FROM prometheus', db);
+  END LOOP;
+END;
+\$\$;
 
-echo "Removing prometheus-postgres-exporter package..."
-apt remove -y prometheus-postgres-exporter || true
-apt purge -y prometheus-postgres-exporter || true
+REVOKE pg_monitor FROM prometheus;
+DROP USER IF EXISTS prometheus;
+SQL
 
-echo "Removing configuration files..."
-rm -f /etc/default/prometheus-postgres-exporter
-
-echo "Revoking privileges for PostgreSQL user 'prometheus'..."
-sudo -u postgres psql -d postgres -c "REVOKE ALL PRIVILEGES ON DATABASE postgres FROM prometheus;" || true
-echo "Dropping PostgreSQL user 'prometheus'..."
-sudo -u postgres psql -c "DROP USER IF EXISTS prometheus;" || true
-
-echo ""
-echo "=========================================="
-echo "Cleanup Complete"
-echo "=========================================="
-echo "The following items have been removed:"
-echo "  - prometheus-postgres-exporter service"
-echo "  - Configuration files"
-echo "  - PostgreSQL user 'prometheus'"
-echo ""
-echo "Note: pg_stat_statements extension was NOT removed."
-echo "To remove it manually, run:"
-echo "  sudo -u postgres psql -d postgres -c 'DROP EXTENSION pg_stat_statements;'"
-echo "=========================================="
+echo "---------------------------------------"
+echo "Done!"
+echo "---------------------------------------"
