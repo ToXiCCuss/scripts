@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(dirname "$0")/notifications.sh"
+source "$(dirname "$0")/../linux/notifications.sh"
 
 PASSWORD_FILE="/root/restic"
 RESTIC_REPO="rclone:pCloud:/Backups/docker"
