@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Import Benachrichtigungs-Bibliothek
 source "$(dirname "$0")/../linux/notifications.sh"
 DISCORD_ERROR_TITLE="MariaDB Logical Backup"
 
