@@ -55,7 +55,6 @@ log "Uploading binary logs to Restic..."
 restic -r "$RESTIC_REPOSITORY" \
     --password-file "$RESTIC_PASSWORD_FILE" \
     backup "$BINLOG_DIR" \
-    --include="${BINLOG_PREFIX}.*" \
     || error "Restic upload of binary logs failed"
 
 # ── Retention ─────────────────────────────────────────────────────────────────
