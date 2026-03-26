@@ -3,7 +3,7 @@
 source "$(dirname "$0")/notifications.sh"
 
 PASSWORD_FILE="/root/restic"
-RESTIC_REPO="rclone:pCloud:/Backups/dev"
+RESTIC_REPO="rclone:pCloud:/Backups/docker"
 
 BACKUP_PATHS=("/var/lib/pterodactyl/volumes")
 EXCLUDE_PATHS=("proc/*" "sys/*" "dev/*" "run/*" "tmp/*")
