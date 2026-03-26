@@ -81,17 +81,13 @@ remove_restic() {
 remove_rclone() {
     step "Remove rclone"
 
-    if ! command -v rclone &>/dev/null; then
+    if ! dpkg -l rclone &>/dev/null 2>&1; then
         warn "rclone is not installed. Skipping."
         return
     fi
 
-    RCLONE_PATH=$(command -v rclone)
-    info "Removing rclone binary: ${RCLONE_PATH}..."
-    rm -f "$RCLONE_PATH"
-
-    # Remove man page if present
-    rm -f /usr/local/share/man/man1/rclone.1
+    info "Removing rclone via apt..."
+    apt-get remove -y rclone
 
     success "rclone removed."
 }
