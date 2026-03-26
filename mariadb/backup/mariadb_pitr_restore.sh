@@ -73,7 +73,7 @@ fi
 command -v restic      &>/dev/null || error "restic is not installed"
 command -v rclone      &>/dev/null || error "rclone is not installed"
 command -v mariabackup &>/dev/null || error "mariabackup is not installed"
-command -v mysqlbinlog &>/dev/null || error "mysqlbinlog is not installed"
+command -v mariadb-binlog &>/dev/null || error "mariadb-binlog is not installed"
 
 [[ -f "$RESTIC_PASSWORD_FILE" ]] || error "Restic password file not found: $RESTIC_PASSWORD_FILE"
 
@@ -185,7 +185,7 @@ echo "$BINLOG_FILES" | sed 's/^/    /'
 echo ""
 
 log "Replaying binary logs..."
-mysqlbinlog \
+mariadb-binlog \
     --stop-datetime="$TARGET_TIME" \
     $BINLOG_FILES \
     | mariadb \
