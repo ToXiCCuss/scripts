@@ -76,8 +76,9 @@ install_rclone() {
     fi
 
     info "Installing rclone via apt..."
-    apt-get install -y rclone
+    apt-get install -y --reinstall rclone
 
+    hash -r
     if ! command -v rclone &>/dev/null; then
         error "rclone installation failed!"
         exit 1
@@ -117,8 +118,11 @@ configure_pcloud() {
     echo -e "  ${CYAN}2.${RESET} Name: ${BOLD}pCloud${RESET}"
     echo -e "  ${CYAN}3.${RESET} Storage type: search for ${BOLD}pcloud${RESET} (enter the number)"
     echo -e "  ${CYAN}4.${RESET} client_id / client_secret: ${BOLD}leave empty${RESET} (press Enter)"
-    echo -e "  ${CYAN}5.${RESET} hostname: ${BOLD}api.pcloud.com${RESET} (EU users: eapi.pcloud.com)"
-    echo -e "  ${CYAN}6.${RESET} Edit advanced config: ${BOLD}n${RESET}"
+    echo -e "  ${CYAN}5.${RESET} Edit advanced config: ${BOLD}y${RESET}"
+    echo -e "  ${CYAN}6.${RESET} Step through options with Enter until ${BOLD}hostname${RESET} appears"
+    echo -e "       → Default (api.pcloud.com) = press Enter"
+    echo -e "       → ${YELLOW}EU users: enter${RESET} ${BOLD}eapi.pcloud.com${RESET}"
+    echo -e "       Continue pressing Enter for remaining options"
     echo -e "  ${CYAN}7.${RESET} Use web browser to authenticate: ${BOLD}y${RESET}"
     echo -e "       → Browser opens – log in to pCloud and grant access"
     echo -e "  ${CYAN}8.${RESET} Quit configuration with ${BOLD}q${RESET}"
