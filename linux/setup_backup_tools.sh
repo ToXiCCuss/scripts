@@ -58,13 +58,23 @@ install_restic() {
         return
     fi
 
-    info "Installing restic via apt..."
-    apt-get update -qq
-    apt-get install -y restic
+    info "Fetching latest restic release from GitHub..."
+    RESTIC_VERSION=$(curl -fsSL https://api.github.com/repos/restic/restic/releases/latest \
+        | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
 
-    # Self-update in case the apt version is outdated
-    info "Running restic self-update (latest version)..."
-    restic self-update || warn "Self-update failed – using apt version."
+    if [[ -z "$RESTIC_VERSION" ]]; then
+        error "Could not determine latest restic version."
+        exit 1
+    fi
+
+    info "Downloading restic v${RESTIC_VERSION}..."
+    ARCH=$(dpkg --print-architecture)  # amd64, arm64, etc.
+    RESTIC_URL="https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_linux_${ARCH}.bz2"
+
+    curl -fsSL "$RESTIC_URL" -o /tmp/restic.bz2
+    bunzip2 -f /tmp/restic.bz2
+    install -m 0755 /tmp/restic /usr/local/bin/restic
+    rm -f /tmp/restic
 
     success "restic installed: $(restic version | awk '{print $2}')"
 }
@@ -77,6 +87,12 @@ install_rclone() {
         CURRENT=$(rclone --version | head -1 | awk '{print $2}')
         warn "rclone is already installed (${CURRENT}). Skipping installation."
         return
+    fi
+
+    # rclone's install script requires unzip
+    if ! command -v unzip &>/dev/null; then
+        info "Installing missing dependency: unzip..."
+        apt-get install -y unzip
     fi
 
     info "Installing rclone via official install script..."
