@@ -1,8 +1,6 @@
 #!/bin/bash
 
-DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1405990393048469554/DsxwaBO38HDaxkwNYwRiePvKvPv35Mxu83OBxC_QWIwYvqUgi4DhbFwz2LuHAr6C9AG8"
-DISCORD_ERROR_TITLE="File-Backup"
-DISCORD_USER_ID="261598730027925505"
+source "$(dirname "$0")/notifications.sh"
 
 PASSWORD_FILE="/root/restic"
 RESTIC_REPO="rclone:pCloud:/Backups/dev"
@@ -10,39 +8,9 @@ RESTIC_REPO="rclone:pCloud:/Backups/dev"
 BACKUP_PATHS=("/var/lib/pterodactyl/volumes")
 EXCLUDE_PATHS=("proc/*" "sys/*" "dev/*" "run/*" "tmp/*")
 
-send_discord_error() {
-    local error_message="$1"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-
-    curl -s -H "Content-Type: application/json" \
-         -X POST \
-         -d "{
-            \"username\": \"Backups\",
-            \"content\": \"<@${DISCORD_USER_ID}>\",
-            \"embeds\": [{
-                \"title\": \"🚨 $DISCORD_ERROR_TITLE\",
-                \"description\": \"**$error_message**\",
-                \"color\": 15158332,
-                \"fields\": [
-                    {
-                        \"name\": \"🖥️ Server\",
-                        \"value\": \"$(hostname)\",
-                        \"inline\": true
-                    },
-                    {
-                        \"name\": \"🕐 Time\",
-                        \"value\": \"$timestamp\",
-                        \"inline\": true
-                    }
-                ]
-            }]
-         }" \
-         "$DISCORD_WEBHOOK_URL"
-}
-
 if [ ${#BACKUP_PATHS[@]} -eq 0 ]; then
     echo "No backup paths defined. Please configure BACKUP_PATHS in the script."
-    send_discord_error "No backup paths defined. Please configure BACKUP_PATHS in the script."
+    send_notification "File-Backup" "No backup paths defined. Please configure BACKUP_PATHS in the script." "error"
     exit 1
 fi
 
@@ -73,8 +41,9 @@ if eval $BACKUP_COMMAND; then
     echo "----------------------------------------------------------------------"
     echo "Backup completed successfully"
     echo "----------------------------------------------------------------------"
+    send_notification "File-Backup" "Backup completed successfully" "success"
 else
     BACKUP_ERROR=$?
     echo "Backup failed with exit code $BACKUP_ERROR"
-    send_discord_error "Backup failed with exit code $BACKUP_ERROR"
+    send_notification "File-Backup" "Backup failed with exit code $BACKUP_ERROR" "error"
 fi
