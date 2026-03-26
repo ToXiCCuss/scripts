@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # Import notification library
-source "$(dirname "$0")/../linux/notifications.sh"
+source "$(dirname "$0")/../../linux/notifications.sh"
 DISCORD_ERROR_TITLE="MariaDB Binary Log Backup"
 
 # ── Configuration ─────────────────────────────────────────────────────────────

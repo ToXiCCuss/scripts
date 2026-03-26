@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "$(dirname "$0")/../linux/notifications.sh"
+source "$(dirname "$0")/../../linux/notifications.sh"
 DISCORD_ERROR_TITLE="MariaDB Logical Backup"
 
 RESTIC_REPOSITORY="rclone:pCloud:/Backups/mariadb_lb"
