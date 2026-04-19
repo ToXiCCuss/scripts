@@ -32,27 +32,9 @@ send_discord_notification() {
         title_emoji="🔒"
     fi
 
-    local update_list=""
-    local max_display=10
-    local count=0
-
-    while IFS= read -r line && [ $count -lt $max_display ]; do
-        if [ -n "$line" ]; then
-            package_name=$(echo "$line" | awk '{print $1}')
-            old_version=$(echo "$line" | awk '{print $2}' | sed 's/\[installed://;s/\]//')
-            new_version=$(echo "$line" | awk '{print $3}')
-
-            if grep -q "$package_name" "$TEMP_SECURITY" 2>/dev/null; then
-                update_list="${update_list}🔒 **${package_name}**: ${old_version} → ${new_version}\n"
-            else
-                update_list="${update_list}📦 **${package_name}**: ${old_version} → ${new_version}\n"
-            fi
-            count=$((count + 1))
-        fi
-    done < "$TEMP_UPDATES"
-
-    if [ "$TOTAL_UPDATES" -gt $max_display ]; then
-        update_list="${update_list}\n... and $(($TOTAL_UPDATES - $max_display)) more updates"
+    local description="There are currently **${TOTAL_UPDATES}** updates available."
+    if [ "$SECURITY_UPDATES" -gt 0 ]; then
+        description="${description}\n⚠️ **${SECURITY_UPDATES}** of them are security updates!"
     fi
 
     curl -s -H "Content-Type: application/json" \
@@ -62,7 +44,7 @@ send_discord_notification() {
             \"content\": \"<@${DISCORD_USER_ID}>\",
             \"embeds\": [{
                 \"title\": \"${title_emoji} ${hostname}\",
-                \"description\": \"${update_list}\",
+                \"description\": \"${description}\",
                 \"color\": ${color},
                 \"fields\": [
                     {
