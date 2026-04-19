@@ -38,17 +38,17 @@ send_discord_notification() {
             \"username\": \"System Updates\",
             \"content\": \"<@${DISCORD_USER_ID}>\",
             \"embeds\": [{
-                \"title\": \"${title_emoji} ${hostname}\",
+                \"title\": \"${title_emoji} Hostname ${hostname}\",
                 \"color\": ${color},
                 \"fields\": [
                     {
                         \"name\": \"📊 Total\",
-                        \"value\": \"${TOTAL_UPDATES} updates\",
+                        \"value\": \"${TOTAL_UPDATES}\",
                         \"inline\": true
                     },
                     {
                         \"name\": \"🔒 Security\",
-                        \"value\": \"${SECURITY_UPDATES} updates\",
+                        \"value\": \"${SECURITY_UPDATES}\",
                         \"inline\": true
                     },
                     {
