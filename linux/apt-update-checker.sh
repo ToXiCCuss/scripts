@@ -32,6 +32,7 @@ send_discord_notification() {
         title_emoji="🔒"
     fi
 
+    local description="updates available"
     curl -s -H "Content-Type: application/json" \
          -X POST \
          -d "{
@@ -39,6 +40,7 @@ send_discord_notification() {
             \"content\": \"<@${DISCORD_USER_ID}>\",
             \"embeds\": [{
                 \"title\": \"${title_emoji} ${hostname}\",
+                \"description\": \"${description}\",
                 \"color\": ${color},
                 \"fields\": [
                     {
