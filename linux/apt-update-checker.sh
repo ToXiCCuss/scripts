@@ -32,11 +32,6 @@ send_discord_notification() {
         title_emoji="🔒"
     fi
 
-    local description="There are currently **${TOTAL_UPDATES}** updates available."
-    if [ "$SECURITY_UPDATES" -gt 0 ]; then
-        description="${description}\n⚠️ **${SECURITY_UPDATES}** of them are security updates!"
-    fi
-
     curl -s -H "Content-Type: application/json" \
          -X POST \
          -d "{
@@ -44,7 +39,6 @@ send_discord_notification() {
             \"content\": \"<@${DISCORD_USER_ID}>\",
             \"embeds\": [{
                 \"title\": \"${title_emoji} ${hostname}\",
-                \"description\": \"${description}\",
                 \"color\": ${color},
                 \"fields\": [
                     {
